@@ -172,6 +172,8 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
 .lesson-block--example { border-left: 4px solid #e4ad44; background: #fffaf0; }
 .lesson-block--example .lesson-block__label { color: #98620e; }
 .lesson-block--link { padding: 22px 25px; }
+.lesson-block--image { padding: 18px; }
+.lesson-block__image { display: block; width: 100%; height: auto; max-height: 720px; object-fit: contain; border-radius: 11px; margin-top: 12px; }
 .external-link { display: flex; align-items: center; justify-content: space-between; gap: 16px; color: #5145a5; font-weight: 700; overflow-wrap: anywhere; margin-top: 10px; }
 .study-section { display: grid; gap: 12px; margin-top: 17px; padding: 28px 30px; background: #f4f5fb; border-radius: 18px; }
 .section-marker { color: #5145a5; margin-bottom: 4px; }

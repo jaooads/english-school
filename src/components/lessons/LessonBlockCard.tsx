@@ -1,4 +1,4 @@
-import { BookOpenText, ExternalLink, Languages, Lightbulb, List, Text } from 'lucide-react'
+import { BookOpenText, ExternalLink, Image as ImageIcon, Languages, Lightbulb, List, Text } from 'lucide-react'
 import type { LessonBlock, LessonBlockType } from '../../types/domain'
 
 const blockMeta: Record<LessonBlockType, { label: string; icon: typeof Text }> = {
@@ -7,6 +7,7 @@ const blockMeta: Record<LessonBlockType, { label: string; icon: typeof Text }> =
   VOCABULARY: { label: 'Vocabulary', icon: Languages },
   EXAMPLE: { label: 'Examples', icon: Lightbulb },
   LINK: { label: 'Link', icon: ExternalLink },
+  IMAGE: { label: 'Material visual', icon: ImageIcon },
 }
 
 function isSafeExternalUrl(value: string) {
@@ -26,7 +27,14 @@ export function LessonBlockCard({ block }: { block: LessonBlock }) {
     <section className={`lesson-block lesson-block--${block.type.toLowerCase()}`}>
       <div className="lesson-block__label"><Icon size={16} /> {meta.label}</div>
       {block.title && <h2>{block.title}</h2>}
-      {block.type === 'LINK' && isSafeExternalUrl(block.content) ? (
+      {block.type === 'IMAGE' ? (
+        <img
+          className="lesson-block__image"
+          src={isSafeExternalUrl(block.content) ? block.content : `${import.meta.env.BASE_URL}notebook-media/${encodeURIComponent(block.content)}`}
+          alt={block.title ?? 'Material visual da aula'}
+          loading="lazy"
+        />
+      ) : block.type === 'LINK' && isSafeExternalUrl(block.content) ? (
         <a href={block.content} target="_blank" rel="noreferrer" className="external-link">
           <span>{block.title ?? block.content}</span><ExternalLink size={17} />
         </a>

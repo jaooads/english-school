@@ -20,6 +20,7 @@ const blockOptions: Array<{ type: LessonBlockType; label: string }> = [
   { type: 'VOCABULARY', label: 'Vocabulary' },
   { type: 'EXAMPLE', label: 'Examples' },
   { type: 'LINK', label: 'Link' },
+  { type: 'IMAGE', label: 'Imagem' },
 ]
 
 function newBlock(type: LessonBlockType): EditableBlock {
@@ -143,7 +144,7 @@ export function LessonEditorPage() {
                 </div>
               </div>
               <div className="field"><label htmlFor={`block-title-${block.id}`}>Título <span>opcional</span></label><input id={`block-title-${block.id}`} value={block.title} onChange={(event) => updateBlock(block.id, 'title', event.target.value)} placeholder={block.type === 'LINK' ? 'Nome do material' : 'Ex.: Estrutura'} /></div>
-              <div className="field"><label htmlFor={`block-content-${block.id}`}>{block.type === 'LINK' ? 'URL' : 'Conteúdo'}</label><textarea id={`block-content-${block.id}`} value={block.content} onChange={(event) => updateBlock(block.id, 'content', event.target.value)} placeholder={block.type === 'LINK' ? 'https://…' : 'Escreva a explicação, exemplos ou anotações…'} required /></div>
+              <div className="field"><label htmlFor={`block-content-${block.id}`}>{block.type === 'LINK' ? 'URL' : block.type === 'IMAGE' ? 'URL ou arquivo' : 'Conteúdo'}</label><textarea id={`block-content-${block.id}`} value={block.content} onChange={(event) => updateBlock(block.id, 'content', event.target.value)} placeholder={block.type === 'LINK' ? 'https://…' : block.type === 'IMAGE' ? 'https://… ou nome-do-arquivo.png' : 'Escreva a explicação, exemplos ou anotações…'} required /></div>
             </section>
           ))}
         </div>
