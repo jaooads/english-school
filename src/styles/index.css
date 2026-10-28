@@ -254,6 +254,23 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
 .question-editor__actions .icon-button:disabled { opacity: .35; cursor: not-allowed; }
 .add-question { justify-self: start; }
 
+.filter-tabs { display: inline-flex; gap: 4px; padding: 4px; background: #ebeef4; border-radius: 11px; margin-bottom: 24px; }
+.filter-tab { min-height: 36px; padding: 0 16px; color: #697284; background: transparent; border: 0; border-radius: 8px; font-size: .83rem; font-weight: 700; cursor: pointer; }
+.filter-tab--active { color: #44398e; background: #fff; box-shadow: 0 2px 8px rgba(43, 49, 75, .08); }
+.overview-list { display: grid; gap: 12px; }
+.overview-card { display: grid; grid-template-columns: minmax(0, 1fr) 150px auto; align-items: center; gap: 24px; padding: 22px 24px; background: #fff; border: 1px solid #e2e5ed; border-radius: 16px; }
+.overview-card__kind { color: #5145a5; font-size: .68rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.overview-card__kind--homework { color: #9a5d16; }
+.overview-card h2 { overflow: hidden; text-overflow: ellipsis; font-size: 1.04rem; white-space: nowrap; margin: 6px 0; }
+.overview-card__main > p { color: #7b8495; font-size: .82rem; margin: 0; }
+.overview-card__progress { display: grid; grid-template-columns: auto auto; align-items: baseline; gap: 2px 5px; }
+.overview-card__progress .status-pill { grid-column: 1 / -1; margin-bottom: 5px; }
+.overview-card__progress strong { font-size: .95rem; }
+.overview-card__progress small { color: #8991a1; }
+.status-pill { justify-self: start; padding: 5px 8px; color: #656f81; background: #f0f2f6; border-radius: 999px; font-size: .67rem; font-weight: 800; }
+.status-pill--waiting { color: #805a16; background: #fff5dd; }
+.status-pill--correct { color: #1a674b; background: #e8f7f0; }
+
 @media (max-width: 800px) {
   .login-page { grid-template-columns: 1fr; width: min(520px, calc(100% - 32px)); gap: 32px; padding: 34px 0; }
   .login-intro h1 { font-size: clamp(2.5rem, 12vw, 4rem); }
@@ -295,6 +312,11 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
   .exercise-card__footer { align-items: stretch; flex-direction: column; padding: 15px 17px; }
   .exercise-card__footer .button { width: 100%; }
   .teacher-correction__save { align-items: stretch; flex-direction: column; }
+  .filter-tabs { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; }
+  .filter-tab { padding: 0 10px; }
+  .overview-card { grid-template-columns: 1fr auto; gap: 17px; padding: 20px 18px; }
+  .overview-card__progress { grid-column: 2; grid-row: 1; }
+  .overview-card > .button { grid-column: 1 / -1; width: 100%; }
   .editor-heading { align-items: flex-start; }
   .editor-heading > .button { display: none; }
   .editor-heading h1 { font-size: 2.35rem; }

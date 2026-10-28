@@ -59,7 +59,7 @@ export function ExerciseCard({ exercise, lessonId, role, onChanged }: ExerciseCa
   const answered = exercise.questions.filter((question) => question.answers.length > 0).length
 
   return (
-    <section className={`exercise-card ${exercise.is_homework ? 'exercise-card--homework' : ''}`}>
+    <section id={`exercise-${exercise.id}`} className={`exercise-card ${exercise.is_homework ? 'exercise-card--homework' : ''}`}>
       <header className="exercise-card__header">
         <div>
           <span>{exercise.is_homework ? 'Homework' : 'Exercise'} · {answered}/{exercise.questions.length} respondidas</span>

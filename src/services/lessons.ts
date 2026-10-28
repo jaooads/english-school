@@ -1,5 +1,9 @@
 import { supabase } from '../lib/supabase'
-import type { AnswerStatus, ExerciseType, Lesson, LessonBlockType, LessonDetail } from '../types/domain'
+import type { AnswerStatus, ExerciseType, ExerciseWithQuestions, Lesson, LessonBlockType, LessonDetail } from '../types/domain'
+
+export interface ExerciseOverview extends ExerciseWithQuestions {
+  lessons: Pick<Lesson, 'id' | 'title' | 'lesson_date'>
+}
 
 interface SaveLessonInput {
   id?: string
@@ -181,4 +185,17 @@ export async function correctStudentAnswer(
     correction_feedback: feedback.trim() || null,
   })
   if (error) throw new Error('Não foi possível salvar esta correção.')
+}
+
+export async function listExerciseOverview() {
+  const { data, error } = await supabase
+    .from('exercises')
+    .select('*, lessons!inner(id, title, lesson_date), questions(*, answers(*))')
+    .order('lesson_date', { referencedTable: 'lessons', ascending: false })
+    .order('position', { ascending: true })
+
+  if (error) throw new Error('Não foi possível carregar os exercícios.')
+  const exercises = (data ?? []) as unknown as ExerciseOverview[]
+  exercises.forEach((exercise) => exercise.questions.sort((a, b) => a.position - b.position))
+  return exercises
 }
