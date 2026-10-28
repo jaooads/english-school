@@ -98,6 +98,7 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
 .page { width: min(1080px, calc(100% - 64px)); margin: 0 auto; padding: 58px 0 80px; }
 .page--narrow { width: min(760px, calc(100% - 64px)); }
 .page--reading { width: min(820px, calc(100% - 64px)); }
+.page--editor { width: min(920px, calc(100% - 64px)); }
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
 .page-header h1 { font: 600 2.7rem/1.05 'Newsreader', serif; letter-spacing: -.02em; margin: 7px 0 0; }
 .page-header p { color: #667085; line-height: 1.6; margin: 9px 0 0; }
@@ -178,6 +179,32 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
 .exercise-preview h3 { margin: 0; font-size: 1rem; }
 .exercise-preview p { color: #828a99; font-size: .82rem; margin: 5px 0 0; }
 
+.editor-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
+.editor-heading h1 { font: 600 2.9rem 'Newsreader', serif; margin: 7px 0 4px; }
+.editor-heading p { color: #737c8d; margin: 0; }
+.editor-form { display: grid; gap: 18px; }
+.editor-error { display: flex; align-items: center; gap: 8px; margin: 0; }
+.editor-panel { padding: 26px; background: #fff; border: 1px solid #e1e5ed; border-radius: 17px; }
+.editor-basics { display: grid; grid-template-columns: 1fr 210px; gap: 20px; }
+.field { display: grid; align-content: start; }
+.field label { color: #344054; font-size: .84rem; font-weight: 700; margin-bottom: 7px; }
+.field label span { color: #939aa8; font-weight: 500; }
+.editor-section-title { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 16px; }
+.editor-section-title h2 { font: 600 1.65rem 'Newsreader', serif; margin: 0; }
+.editor-section-title p { color: #7a8393; font-size: .88rem; margin: 4px 0 0; }
+.editor-blocks { display: grid; gap: 13px; }
+.editor-block { display: grid; gap: 18px; }
+.editor-block__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid #eceef3; }
+.editor-block__toolbar select { width: 185px; min-height: 38px; }
+.editor-block__toolbar > div { display: flex; gap: 3px; }
+.editor-block__toolbar .icon-button:disabled { opacity: .35; cursor: not-allowed; }
+.editor-block textarea { min-height: 145px; line-height: 1.6; }
+.add-block-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 13px 0; }
+.add-block-row > span { color: #737c8d; font-size: .84rem; font-weight: 700; margin-right: 4px; }
+.add-block-button { display: inline-flex; align-items: center; gap: 5px; min-height: 36px; padding: 0 12px; color: #5145a5; background: #f0eefc; border: 0; border-radius: 9px; font-size: .8rem; font-weight: 700; cursor: pointer; }
+.add-block-button:hover { background: #e5e1fa; }
+.mobile-save { display: none; }
+
 @media (max-width: 800px) {
   .login-page { grid-template-columns: 1fr; width: min(520px, calc(100% - 32px)); gap: 32px; padding: 34px 0; }
   .login-intro h1 { font-size: clamp(2.5rem, 12vw, 4rem); }
@@ -191,7 +218,7 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
   .bottom-nav__link { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #8a92a2; text-decoration: none; font-size: .67rem; font-weight: 600; }
   .bottom-nav__link--active { color: #5145a5; }
   .app-main { margin-left: 0; }
-  .page, .page--narrow, .page--reading { width: min(100% - 32px, 680px); padding: 28px 0 96px; }
+  .page, .page--narrow, .page--reading, .page--editor { width: min(100% - 32px, 680px); padding: 28px 0 96px; }
   .page-header { align-items: flex-start; margin-bottom: 24px; }
   .page-header { flex-direction: column; }
   .page-header__action, .page-header__action .button { width: 100%; }
@@ -213,6 +240,14 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
   .lesson-heading__actions .button { flex: 1; }
   .lesson-block, .study-section { padding: 23px 20px; }
   .lesson-block__content { line-height: 1.7; }
+  .editor-heading { align-items: flex-start; }
+  .editor-heading > .button { display: none; }
+  .editor-heading h1 { font-size: 2.35rem; }
+  .editor-basics { grid-template-columns: 1fr; }
+  .editor-panel { padding: 21px 18px; }
+  .editor-block__toolbar select { width: 155px; }
+  .mobile-save { display: block; position: sticky; bottom: 78px; z-index: 10; padding-top: 10px; }
+  .mobile-save .button { width: 100%; box-shadow: 0 10px 30px rgba(42, 35, 91, .2); }
 }
 
 @media (max-width: 420px) {
