@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { ExerciseType, Lesson, LessonBlockType, LessonDetail } from '../types/domain'
+import type { AnswerStatus, ExerciseType, Lesson, LessonBlockType, LessonDetail } from '../types/domain'
 
 interface SaveLessonInput {
   id?: string
@@ -158,4 +158,27 @@ export async function saveExercise(input: SaveExerciseInput) {
 export async function deleteExercise(id: string) {
   const { error } = await supabase.from('exercises').delete().eq('id', id)
   if (error) throw new Error('Não foi possível excluir a atividade.')
+}
+
+export async function saveStudentAnswer(questionId: string, answer: string) {
+  const { error } = await supabase.rpc('save_student_answer', {
+    target_question_id: questionId,
+    answer_text: answer.trim(),
+  })
+  if (error) throw new Error('Não foi possível salvar esta resposta.')
+}
+
+export async function correctStudentAnswer(
+  answerId: string,
+  status: Exclude<AnswerStatus, 'PENDING'>,
+  correctedAnswer: string,
+  feedback: string,
+) {
+  const { error } = await supabase.rpc('correct_student_answer', {
+    target_answer_id: answerId,
+    correction_status: status,
+    correction_answer: correctedAnswer.trim() || null,
+    correction_feedback: feedback.trim() || null,
+  })
+  if (error) throw new Error('Não foi possível salvar esta correção.')
 }

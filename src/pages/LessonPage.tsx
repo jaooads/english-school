@@ -2,6 +2,7 @@ import { AlertCircle, ArrowLeft, CalendarDays, Edit3, Plus, RefreshCw, Trash2 } 
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { LessonBlockCard, LessonSectionMarker } from '../components/lessons/LessonBlockCard'
+import { ExerciseCard } from '../components/exercises/ExerciseCard'
 import { useAuth } from '../contexts/AuthContext'
 import { formatDate } from '../lib/date'
 import { deleteLesson, getLesson } from '../services/lessons'
@@ -87,7 +88,7 @@ export function LessonPage() {
           <section className="study-section">
             <LessonSectionMarker />
             {classExercises.map((exercise) => (
-              <div className="exercise-preview" key={exercise.id}><div><h3>{exercise.title}</h3><p>{exercise.questions.length} {exercise.questions.length === 1 ? 'questão' : 'questões'}</p></div>{profile?.role === 'TEACHER' && <Link to={`/aulas/${lesson.id}/exercicios/${exercise.id}/editar`} className="icon-button" aria-label="Editar exercício"><Edit3 size={17} /></Link>}</div>
+              <ExerciseCard key={exercise.id} exercise={exercise} lessonId={lesson.id} role={profile!.role} onChanged={load} />
             ))}
           </section>
         )}
@@ -96,7 +97,7 @@ export function LessonPage() {
           <section className="study-section study-section--homework">
             <LessonSectionMarker homework />
             {homework.map((exercise) => (
-              <div className="exercise-preview" key={exercise.id}><div><h3>{exercise.title}</h3><p>{exercise.questions.length} {exercise.questions.length === 1 ? 'questão' : 'questões'}</p></div>{profile?.role === 'TEACHER' && <Link to={`/aulas/${lesson.id}/exercicios/${exercise.id}/editar`} className="icon-button" aria-label="Editar homework"><Edit3 size={17} /></Link>}</div>
+              <ExerciseCard key={exercise.id} exercise={exercise} lessonId={lesson.id} role={profile!.role} onChanged={load} />
             ))}
           </section>
         )}
