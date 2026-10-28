@@ -1,20 +1,13 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { FullPageState } from './components/FullPageState'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { AppLayout } from './components/layout/AppLayout'
+import { AuthProvider } from './contexts/AuthContext'
 import { supabaseConfigured } from './lib/supabase'
+import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
-
-function NotebookPlaceholder() {
-  const { profile } = useAuth()
-  return (
-    <main className="welcome">
-      <span className="eyebrow">English School</span>
-      <h1>Olá, {profile?.name}.</h1>
-      <p>Seu caderno está pronto para receber as aulas.</p>
-    </main>
-  )
-}
+import { PlaceholderPage } from './pages/PlaceholderPage'
+import { ProfilePage } from './pages/ProfilePage'
 
 function App() {
   if (!supabaseConfigured) {
@@ -32,7 +25,13 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route element={<ProtectedRoute />}>
-          <Route index element={<NotebookPlaceholder />} />
+          <Route element={<AppLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="aulas" element={<PlaceholderPage title="Aulas" />} />
+            <Route path="aulas/nova" element={<PlaceholderPage title="Nova aula" />} />
+            <Route path="exercicios" element={<PlaceholderPage title="Exercícios" />} />
+            <Route path="perfil" element={<ProfilePage />} />
+          </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
