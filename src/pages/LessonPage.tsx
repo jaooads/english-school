@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowLeft, CalendarDays, Edit3, RefreshCw, Trash2 } from 'lucide-react'
+import { AlertCircle, ArrowLeft, CalendarDays, Edit3, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { LessonBlockCard, LessonSectionMarker } from '../components/lessons/LessonBlockCard'
@@ -79,11 +79,15 @@ export function LessonPage() {
         {lesson.lesson_blocks.length === 0 && <div className="lesson-empty">Esta aula ainda não tem conteúdo.</div>}
         {lesson.lesson_blocks.map((block) => <LessonBlockCard key={block.id} block={block} />)}
 
+        {profile?.role === 'TEACHER' && (
+          <div className="exercise-add-row"><Link to={`/aulas/${lesson.id}/exercicios/novo`} className="button button--secondary button--with-icon"><Plus size={17} /> Adicionar exercício ou homework</Link></div>
+        )}
+
         {classExercises.length > 0 && (
           <section className="study-section">
             <LessonSectionMarker />
             {classExercises.map((exercise) => (
-              <div className="exercise-preview" key={exercise.id}><h3>{exercise.title}</h3><p>{exercise.questions.length} {exercise.questions.length === 1 ? 'questão' : 'questões'}</p></div>
+              <div className="exercise-preview" key={exercise.id}><div><h3>{exercise.title}</h3><p>{exercise.questions.length} {exercise.questions.length === 1 ? 'questão' : 'questões'}</p></div>{profile?.role === 'TEACHER' && <Link to={`/aulas/${lesson.id}/exercicios/${exercise.id}/editar`} className="icon-button" aria-label="Editar exercício"><Edit3 size={17} /></Link>}</div>
             ))}
           </section>
         )}
@@ -92,7 +96,7 @@ export function LessonPage() {
           <section className="study-section study-section--homework">
             <LessonSectionMarker homework />
             {homework.map((exercise) => (
-              <div className="exercise-preview" key={exercise.id}><h3>{exercise.title}</h3><p>{exercise.questions.length} {exercise.questions.length === 1 ? 'questão' : 'questões'}</p></div>
+              <div className="exercise-preview" key={exercise.id}><div><h3>{exercise.title}</h3><p>{exercise.questions.length} {exercise.questions.length === 1 ? 'questão' : 'questões'}</p></div>{profile?.role === 'TEACHER' && <Link to={`/aulas/${lesson.id}/exercicios/${exercise.id}/editar`} className="icon-button" aria-label="Editar homework"><Edit3 size={17} /></Link>}</div>
             ))}
           </section>
         )}

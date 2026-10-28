@@ -8,6 +8,7 @@ import { HomePage } from './pages/HomePage'
 import { LessonsPage } from './pages/LessonsPage'
 import { LessonPage } from './pages/LessonPage'
 import { LessonEditorPage } from './pages/LessonEditorPage'
+import { ExerciseEditorPage } from './pages/ExerciseEditorPage'
 import { LoginPage } from './pages/LoginPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { ProfilePage } from './pages/ProfilePage'
@@ -34,6 +35,8 @@ function App() {
             <Route path="aulas/:lessonId" element={<LessonPage />} />
             <Route path="aulas/nova" element={<LessonEditorPage />} />
             <Route path="aulas/:lessonId/editar" element={<LessonEditorPage />} />
+            <Route path="aulas/:lessonId/exercicios/novo" element={<ExerciseEditorPage />} />
+            <Route path="aulas/:lessonId/exercicios/:exerciseId/editar" element={<ExerciseEditorPage />} />
             <Route path="exercicios" element={<PlaceholderPage title="Exercícios" />} />
             <Route path="perfil" element={<ProfilePage />} />
           </Route>

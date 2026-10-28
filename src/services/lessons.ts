@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { Lesson, LessonBlockType, LessonDetail } from '../types/domain'
+import type { ExerciseType, Lesson, LessonBlockType, LessonDetail } from '../types/domain'
 
 interface SaveLessonInput {
   id?: string
@@ -8,6 +8,18 @@ interface SaveLessonInput {
   createdBy: string
   blocks: Array<{ id: string; persisted: boolean; type: LessonBlockType; title: string; content: string }>
   removedBlockIds: string[]
+}
+
+interface SaveExerciseInput {
+  id?: string
+  lessonId: string
+  title: string
+  instructions: string
+  type: ExerciseType
+  isHomework: boolean
+  position: number
+  questions: Array<{ id: string; persisted: boolean; question: string }>
+  removedQuestionIds: string[]
 }
 
 export async function listLessons() {
@@ -92,4 +104,58 @@ export async function saveLesson(input: SaveLessonInput) {
   }
 
   return lessonId
+}
+
+export async function saveExercise(input: SaveExerciseInput) {
+  let exerciseId = input.id
+  const exerciseValues = {
+    title: input.title,
+    instructions: input.instructions || null,
+    type: input.type,
+    is_homework: input.isHomework,
+    position: input.position,
+  }
+
+  if (exerciseId) {
+    const { error } = await supabase.from('exercises').update(exerciseValues).eq('id', exerciseId)
+    if (error) throw new Error('Não foi possível atualizar a atividade.')
+  } else {
+    const { data, error } = await supabase
+      .from('exercises')
+      .insert({ ...exerciseValues, lesson_id: input.lessonId })
+      .select('id')
+      .single()
+    if (error || !data) throw new Error('Não foi possível criar a atividade.')
+    exerciseId = data.id as string
+  }
+
+  if (input.removedQuestionIds.length > 0) {
+    const { error } = await supabase.from('questions').delete().in('id', input.removedQuestionIds)
+    if (error) throw new Error('A atividade foi salva, mas não foi possível remover uma questão.')
+  }
+
+  for (const question of input.questions.filter((item) => item.persisted)) {
+    const { error } = await supabase.from('questions').update({
+      question: question.question.trim(),
+      position: input.questions.indexOf(question),
+    }).eq('id', question.id)
+    if (error) throw new Error('A atividade foi salva, mas uma questão não pôde ser atualizada.')
+  }
+
+  const newQuestions = input.questions.filter((item) => !item.persisted)
+  if (newQuestions.length > 0) {
+    const { error } = await supabase.from('questions').insert(newQuestions.map((question) => ({
+      exercise_id: exerciseId,
+      question: question.question.trim(),
+      position: input.questions.indexOf(question),
+    })))
+    if (error) throw new Error('A atividade foi salva, mas uma questão não pôde ser adicionada.')
+  }
+
+  return exerciseId
+}
+
+export async function deleteExercise(id: string) {
+  const { error } = await supabase.from('exercises').delete().eq('id', id)
+  if (error) throw new Error('Não foi possível excluir a atividade.')
 }
