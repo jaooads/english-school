@@ -1,6 +1,6 @@
-import { AlertCircle, ArrowLeft, CalendarDays, Edit3, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { AlertCircle, ArrowLeft, CalendarDays, CheckCircle2, Edit3, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { LessonBlockCard, LessonSectionMarker } from '../components/lessons/LessonBlockCard'
 import { ExerciseCard } from '../components/exercises/ExerciseCard'
 import { useAuth } from '../contexts/AuthContext'
@@ -11,6 +11,7 @@ import type { LessonDetail } from '../types/domain'
 export function LessonPage() {
   const { lessonId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { profile } = useAuth()
   const [lesson, setLesson] = useState<LessonDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -39,7 +40,7 @@ export function LessonPage() {
     setDeleting(true)
     try {
       await deleteLesson(lesson.id)
-      navigate('/aulas', { replace: true })
+      navigate('/aulas', { replace: true, state: { message: 'Aula excluída com sucesso.' } })
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Não foi possível excluir a aula.')
       setDeleting(false)
@@ -63,6 +64,7 @@ export function LessonPage() {
   return (
     <article className="page page--reading lesson-page">
       <Link to="/aulas" className="back-link"><ArrowLeft size={17} /> Voltar para aulas</Link>
+      {location.state?.message && <div className="form-message form-message--success page-message" role="status"><CheckCircle2 size={18} />{location.state.message}</div>}
       <header className="lesson-heading">
         <div>
           <span className="lesson-heading__date"><CalendarDays size={17} /> {formatDate(lesson.lesson_date)}</span>

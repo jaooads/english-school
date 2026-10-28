@@ -1,6 +1,6 @@
-import { AlertCircle, ArrowRight, BookOpen, CalendarDays, Plus, RefreshCw } from 'lucide-react'
+import { AlertCircle, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Plus, RefreshCw } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { useAuth } from '../contexts/AuthContext'
 import { formatDate, formatMonth } from '../lib/date'
@@ -9,6 +9,7 @@ import type { Lesson } from '../types/domain'
 
 export function LessonsPage() {
   const { profile } = useAuth()
+  const location = useLocation()
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -47,6 +48,8 @@ export function LessonsPage() {
           <Link to="/aulas/nova" className="button button--primary button--with-icon"><Plus size={18} /> Nova aula</Link>
         ) : undefined}
       />
+
+      {location.state?.message && <div className="form-message form-message--success page-message" role="status"><CheckCircle2 size={18} />{location.state.message}</div>}
 
       {loading && (
         <div className="content-state" role="status"><span className="loader" /><p>Buscando as aulas…</p></div>

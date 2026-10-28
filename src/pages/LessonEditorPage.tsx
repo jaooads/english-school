@@ -103,7 +103,7 @@ export function LessonEditorPage() {
         blocks,
         removedBlockIds: initialBlockIds.filter((id) => !blocks.some((block) => block.id === id)),
       })
-      navigate(`/aulas/${savedId}`, { replace: true })
+      navigate(`/aulas/${savedId}`, { replace: true, state: { message: 'Aula salva com sucesso.' } })
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Não foi possível salvar a aula.')
       setSaving(false)

@@ -100,7 +100,7 @@ export function ExerciseEditorPage() {
         questions,
         removedQuestionIds: initialQuestionIds.filter((id) => !questions.some((question) => question.id === id)),
       })
-      navigate(`/aulas/${lessonId}`, { replace: true })
+      navigate(`/aulas/${lessonId}`, { replace: true, state: { message: 'Atividade salva com sucesso.' } })
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Não foi possível salvar o exercício.')
       setSaving(false)
