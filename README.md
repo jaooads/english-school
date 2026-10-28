@@ -109,6 +109,29 @@ Em **Authentication → URL Configuration**, configure:
 
 Para validar a interface com conteúdo real, execute manualmente [`supabase/seed.example.sql`](supabase/seed.example.sql) depois de configurar Camila. O seed adiciona somente a aula **Simple Past Question**, de **02/09/2026**, extraída do caderno fornecido. Ele não importa as demais aulas.
 
+### 5. Importação completa do caderno
+
+Para migrar todo o `Digital English Notebook`, execute no SQL Editor, nesta ordem:
+
+1. [`supabase/migrations/202610270002_add_image_blocks.sql`](supabase/migrations/202610270002_add_image_blocks.sql);
+2. [`supabase/migrations/202610270003_add_lesson_source_reference.sql`](supabase/migrations/202610270003_add_lesson_source_reference.sql);
+3. [`supabase/imports/digital_notebook_full.sql`](supabase/imports/digital_notebook_full.sql).
+
+O import completo cria 27 aulas e 231 blocos, preservando os 1.624 parágrafos úteis, 19 links identificados e 6 imagens do documento. A operação é transacional e pode ser repetida: cada aula importada possui uma referência de origem, evitando duplicação.
+
+As respostas e correções históricas permanecem no texto original, pois no DOCX elas estão misturadas no mesmo parágrafo. Elas não são convertidas automaticamente em respostas interativas para evitar atribuições incorretas. Novos exercícios continuam usando normalmente o fluxo estruturado de respostas e correções.
+
+Não execute o seed opcional se pretende usar o import completo. Caso já tenha executado o seed, exclua a aula de demonstração antes da importação para evitar uma cópia visual da aula de 02/09/2026.
+
+O arquivo SQL pode ser regenerado a partir do DOCX com:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File .\scripts\generate-notebook-import.ps1 `
+  -DocxPath "C:\caminho\Digital English Notbook.docx" `
+  -OutputPath "supabase\imports\digital_notebook_full.sql"
+```
+
 ## Papéis e permissões
 
 | Ação | Camila (`TEACHER`) | João (`STUDENT`) |
