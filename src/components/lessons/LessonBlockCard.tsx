@@ -1,4 +1,4 @@
-import { BookOpenText, ExternalLink, Image as ImageIcon, Languages, Lightbulb, List, Text } from 'lucide-react'
+import { BookOpenText, ExternalLink, FileText, Image as ImageIcon, Languages, Lightbulb, List, Text } from 'lucide-react'
 import type { LessonBlock, LessonBlockType } from '../../types/domain'
 
 const blockMeta: Record<LessonBlockType, { label: string; icon: typeof Text }> = {
@@ -19,13 +19,45 @@ function isSafeExternalUrl(value: string) {
   }
 }
 
-export function LessonBlockCard({ block }: { block: LessonBlock }) {
-  const meta = blockMeta[block.type]
-  const Icon = meta.icon
+export function getLessonBlockLabel(type: LessonBlockType) {
+  return blockMeta[type].label
+}
+
+function DidacticText({ content }: { content: string }) {
+  const lines = content.split('\n')
 
   return (
-    <section className={`lesson-block lesson-block--${block.type.toLowerCase()}`}>
-      <div className="lesson-block__label"><Icon size={16} /> {meta.label}</div>
+    <div className="lesson-block__content">
+      {lines.map((line, index) => {
+        const emphasized = /^(regra|estrutura|importante|atenção|remember|resumo|dica)\s*:?/i.test(line.trim())
+        return line.trim() ? (
+          <p key={`${index}-${line.slice(0, 12)}`} className={emphasized ? 'lesson-block__highlight' : undefined}>{line}</p>
+        ) : <span key={index} className="lesson-block__space" aria-hidden="true" />
+      })}
+    </div>
+  )
+}
+
+export function LessonBlockCard({ block, step }: { block: LessonBlock; step: number }) {
+  const meta = blockMeta[block.type]
+  const Icon = meta.icon
+  const isSourceNote = block.title?.toLocaleLowerCase('pt-BR').startsWith('identifica')
+
+  if (isSourceNote) {
+    return (
+      <aside id={`block-${block.id}`} className="source-note">
+        <FileText size={16} />
+        <span><strong>Registro original do caderno</strong>{block.content}</span>
+      </aside>
+    )
+  }
+
+  return (
+    <section id={`block-${block.id}`} className={`lesson-block lesson-block--${block.type.toLowerCase()}`}>
+      <div className="lesson-block__topline">
+        <div className="lesson-block__label"><Icon size={16} /> {meta.label}</div>
+        <span className="lesson-block__step">Etapa {String(step).padStart(2, '0')}</span>
+      </div>
       {block.title && <h2>{block.title}</h2>}
       {block.type === 'IMAGE' ? (
         <img
@@ -36,10 +68,10 @@ export function LessonBlockCard({ block }: { block: LessonBlock }) {
         />
       ) : block.type === 'LINK' && isSafeExternalUrl(block.content) ? (
         <a href={block.content} target="_blank" rel="noreferrer" className="external-link">
-          <span>{block.title ?? block.content}</span><ExternalLink size={17} />
+          <span>Abrir material externo</span><ExternalLink size={17} />
         </a>
       ) : (
-        <div className="lesson-block__content">{block.content}</div>
+        <DidacticText content={block.content} />
       )}
     </section>
   )
