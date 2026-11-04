@@ -233,14 +233,26 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
 .exercise-card__header span { color: #7468b8; font-size: .7rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
 .exercise-card__header h3 { font-size: 1.08rem; margin: 6px 0 0; }
 .exercise-card__header p { color: #737c8d; font-size: .87rem; line-height: 1.5; margin: 7px 0 0; }
+.exercise-progress { display: flex; align-items: center; gap: 9px; max-width: 280px; margin-top: 14px; }
+.exercise-progress > div { flex: 1; overflow: hidden; height: 6px; background: #eceaf5; border-radius: 999px; }
+.exercise-progress > div > span { display: block; height: 100%; background: #6b5db6; border-radius: inherit; transition: width .2s ease; }
+.exercise-progress small { color: #7468b8; font-size: .7rem; font-weight: 800; }
 .exercise-card__actions { display: flex; gap: 3px; }
 .exercise-questions { display: grid; }
 .study-question { display: grid; gap: 13px; padding: 22px 23px; border-bottom: 1px solid #eceef3; }
 .study-question:last-child { border-bottom: 0; }
-.study-question__prompt { display: grid; grid-template-columns: 26px 1fr; align-items: start; gap: 10px; }
+.study-question--answered { background: #fcfcfe; }
+.study-question__prompt { display: grid; grid-template-columns: 26px 1fr auto; align-items: start; gap: 10px; }
 .study-question__prompt > span { display: grid; place-items: center; width: 25px; height: 25px; color: #5549a2; background: #eeecff; border-radius: 8px; font-size: .73rem; font-weight: 800; }
+.study-question__prompt small { display: block; color: #8b93a2; font-size: .66rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 3px; }
 .study-question__prompt p { line-height: 1.55; white-space: pre-wrap; margin: 2px 0 0; }
 .study-question input, .study-question > textarea { background: #fbfcfe; }
+.answer-field { display: grid; gap: 6px; padding-left: 36px; }
+.answer-field > span { color: #596376; font-size: .76rem; font-weight: 750; }
+.question-status { display: inline-flex; align-items: center; gap: 4px; min-height: 25px; padding: 0 8px; border-radius: 999px; font-size: .67rem; font-weight: 800; }
+.question-status--pending { color: #805d1e; background: #fff5dd; }
+.question-status--correct { color: #176144; background: #e7f7ef; }
+.question-status--incorrect { color: #982f27; background: #ffefee; }
 .answer-status { display: flex; align-items: center; gap: 7px; color: #805d1e; font-size: .82rem; padding: 9px 11px; background: #fff8e8; border-radius: 9px; }
 .correction-result { display: grid; gap: 9px; padding: 13px 15px; border-radius: 10px; }
 .correction-result--correct { color: #176144; background: #eaf8f1; }
@@ -248,7 +260,8 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
 .correction-result > strong { display: flex; align-items: center; gap: 7px; }
 .correction-result p { line-height: 1.5; margin: 0; }
 .correction-result p span, .student-answer span { display: block; opacity: .72; font-size: .7rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 3px; }
-.exercise-card__footer { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 16px 22px; background: #fafbfc; border-top: 1px solid #e9ebf1; }
+.exercise-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 22px; background: #fafbfc; border-top: 1px solid #e9ebf1; }
+.save-hint { color: #7f8797; font-size: .78rem; }
 .save-message { display: inline-flex; align-items: center; gap: 5px; font-size: .82rem; }
 .save-message--success { color: #1e6b50; }
 .save-message--error { color: #a52d24; }
@@ -260,6 +273,7 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
 .correction-choice .selected-correct { color: #176144; background: #e7f7ef; border-color: #a8ddc8; }
 .correction-choice .selected-incorrect { color: #982f27; background: #ffefee; border-color: #efbbb7; }
 .teacher-correction > label { color: #4d5668; font-size: .78rem; font-weight: 700; }
+.optional-label { color: #949ba8; font-weight: 500; margin-left: 4px; }
 .teacher-correction > label input, .teacher-correction > label textarea { margin-top: 6px; }
 .teacher-correction > label textarea { min-height: 76px; }
 .teacher-correction__save { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
@@ -375,6 +389,9 @@ input:focus, textarea:focus, select:focus { border-color: #7569c7; box-shadow: 0
   .lesson-block__content { line-height: 1.7; }
   .exercise-card__header { padding: 19px 17px; }
   .study-question { padding: 19px 17px; }
+  .study-question__prompt { grid-template-columns: 26px 1fr; }
+  .question-status { grid-column: 2; justify-self: start; }
+  .answer-field { padding-left: 0; }
   .teacher-correction { margin-left: 0; }
   .exercise-card__footer { align-items: stretch; flex-direction: column; padding: 15px 17px; }
   .exercise-card__footer .button { width: 100%; }

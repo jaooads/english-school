@@ -1,6 +1,7 @@
 import { Check, CheckCircle2, Edit3, MessageSquareText, Save, Trash2, X, XCircle } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getExerciseProgress } from '../../lib/progress'
 import { correctStudentAnswer, deleteExercise, saveStudentAnswer } from '../../services/lessons'
 import type { Answer, AnswerStatus, AppRole, ExerciseWithQuestions } from '../../types/domain'
 
@@ -16,6 +17,7 @@ export function ExerciseCard({ exercise, lessonId, role, onChanged }: ExerciseCa
   const [drafts, setDrafts] = useState<Record<string, string>>(answers)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const progress = getExerciseProgress(exercise)
 
   useEffect(() => setDrafts(answers), [answers])
 
@@ -65,6 +67,10 @@ export function ExerciseCard({ exercise, lessonId, role, onChanged }: ExerciseCa
           <span>{exercise.is_homework ? 'Homework' : 'Exercise'} · {answered}/{exercise.questions.length} respondidas</span>
           <h3>{exercise.title}</h3>
           {exercise.instructions && <p>{exercise.instructions}</p>}
+          <div className="exercise-progress" aria-label={`${progress.percentage}% respondido`}>
+            <div><span style={{ width: `${progress.percentage}%` }} /></div>
+            <small>{progress.percentage}%</small>
+          </div>
         </div>
         {role === 'TEACHER' && (
           <div className="exercise-card__actions">
@@ -78,15 +84,22 @@ export function ExerciseCard({ exercise, lessonId, role, onChanged }: ExerciseCa
         {exercise.questions.map((question, index) => {
           const answer = question.answers[0]
           return (
-            <div className="study-question" key={question.id}>
-              <div className="study-question__prompt"><span>{index + 1}</span><p>{question.question}</p></div>
+            <div className={`study-question ${answer ? 'study-question--answered' : ''}`} key={question.id}>
+              <div className="study-question__prompt">
+                <span>{index + 1}</span>
+                <div><small>Questão {index + 1}</small><p>{question.question}</p></div>
+                {answer && <QuestionStatus status={answer.status} />}
+              </div>
               {role === 'STUDENT' ? (
                 <>
+                  <label className="answer-field" htmlFor={`answer-${question.id}`}>
+                    <span>Sua resposta</span>
                   {exercise.type === 'TEXTAREA' ? (
-                    <textarea value={drafts[question.id] ?? ''} onChange={(event) => setDrafts((current) => ({ ...current, [question.id]: event.target.value }))} placeholder="Escreva sua resposta…" />
+                    <textarea id={`answer-${question.id}`} value={drafts[question.id] ?? ''} onChange={(event) => setDrafts((current) => ({ ...current, [question.id]: event.target.value }))} placeholder="Escreva sua resposta…" />
                   ) : (
-                    <input value={drafts[question.id] ?? ''} onChange={(event) => setDrafts((current) => ({ ...current, [question.id]: event.target.value }))} placeholder="Sua resposta…" />
+                    <input id={`answer-${question.id}`} value={drafts[question.id] ?? ''} onChange={(event) => setDrafts((current) => ({ ...current, [question.id]: event.target.value }))} placeholder="Digite sua resposta…" />
                   )}
+                  </label>
                   {answer && <StudentCorrection answer={answer} />}
                 </>
               ) : answer ? (
@@ -101,12 +114,19 @@ export function ExerciseCard({ exercise, lessonId, role, onChanged }: ExerciseCa
 
       {role === 'STUDENT' && (
         <footer className="exercise-card__footer">
-          {message && <span className={`save-message save-message--${message.type}`} role="status">{message.type === 'success' ? <Check size={16} /> : <X size={16} />}{message.text}</span>}
-          <button className="button button--primary button--with-icon" onClick={() => void handleStudentSave()} disabled={saving}><Save size={17} />{saving ? 'Salvando…' : 'Salvar respostas'}</button>
+          <div>
+            {message ? <span className={`save-message save-message--${message.type}`} role="status">{message.type === 'success' ? <Check size={16} /> : <X size={16} />}{message.text}</span> : <span className="save-hint">Você pode salvar agora e continuar depois.</span>}
+          </div>
+          <button className="button button--primary button--with-icon" onClick={() => void handleStudentSave()} disabled={saving}><Save size={17} />{saving ? 'Salvando…' : 'Salvar progresso'}</button>
         </footer>
       )}
     </section>
   )
+}
+
+function QuestionStatus({ status }: { status: AnswerStatus }) {
+  const label = status === 'CORRECT' ? 'Correta' : status === 'INCORRECT' ? 'Revisar' : 'Salva'
+  return <span className={`question-status question-status--${status.toLowerCase()}`}>{status === 'CORRECT' ? <CheckCircle2 size={14} /> : status === 'INCORRECT' ? <XCircle size={14} /> : <Save size={13} />}{label}</span>
 }
 
 function StudentCorrection({ answer }: { answer: Answer }) {
@@ -148,11 +168,11 @@ function TeacherCorrection({ answer, onChanged }: { answer: Answer; onChanged: (
     <div className="teacher-correction">
       <div className="student-answer"><span>Resposta do João</span><p>{answer.answer}</p></div>
       <div className="correction-choice">
-        <button type="button" className={status === 'CORRECT' ? 'selected-correct' : ''} onClick={() => void saveCorrection('CORRECT')} disabled={saving}><CheckCircle2 size={17} /> Correta</button>
-        <button type="button" className={status === 'INCORRECT' ? 'selected-incorrect' : ''} onClick={() => setStatus('INCORRECT')} disabled={saving}><XCircle size={17} /> Incorreta</button>
+        <button type="button" className={status === 'CORRECT' ? 'selected-correct' : ''} onClick={() => setStatus('CORRECT')} disabled={saving} aria-pressed={status === 'CORRECT'}><CheckCircle2 size={17} /> Correta</button>
+        <button type="button" className={status === 'INCORRECT' ? 'selected-incorrect' : ''} onClick={() => setStatus('INCORRECT')} disabled={saving} aria-pressed={status === 'INCORRECT'}><XCircle size={17} /> Precisa revisar</button>
       </div>
       {status === 'INCORRECT' && <label>Resposta correta <input value={correctedAnswer} onChange={(event) => setCorrectedAnswer(event.target.value)} placeholder="Como deveria ficar?" /></label>}
-      <label>Comentário <textarea value={feedback} onChange={(event) => setFeedback(event.target.value)} placeholder="Deixe uma orientação para o João…" /></label>
+      <label>Comentário para o João <span className="optional-label">opcional</span><textarea value={feedback} onChange={(event) => setFeedback(event.target.value)} placeholder="Explique o que ele acertou ou como pode melhorar…" /></label>
       <div className="teacher-correction__save">
         {error && <span className="save-message save-message--error"><X size={16} />{error}</span>}
         <button type="button" className="button button--secondary button--with-icon" onClick={() => void saveCorrection()} disabled={!status || saving}><Save size={16} />{saving ? 'Salvando…' : 'Salvar correção'}</button>

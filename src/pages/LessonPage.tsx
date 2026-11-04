@@ -18,9 +18,9 @@ export function LessonPage() {
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  async function load() {
+  async function load(showLoading = true) {
     if (!lessonId) return
-    setLoading(true)
+    if (showLoading) setLoading(true)
     setError(null)
     try {
       setLesson(await getLesson(lessonId))
@@ -124,7 +124,7 @@ export function LessonPage() {
               <LessonSectionMarker />
               <p className="study-section__intro">Agora é hora de aplicar o que apareceu nas etapas acima.</p>
               {classExercises.map((exercise) => (
-                <ExerciseCard key={exercise.id} exercise={exercise} lessonId={lesson.id} role={profile!.role} onChanged={load} />
+              <ExerciseCard key={exercise.id} exercise={exercise} lessonId={lesson.id} role={profile!.role} onChanged={() => load(false)} />
               ))}
             </section>
           )}
@@ -134,7 +134,7 @@ export function LessonPage() {
               <LessonSectionMarker homework />
               <p className="study-section__intro">Faça com calma depois da aula e salve mesmo que ainda não tenha terminado.</p>
               {homework.map((exercise) => (
-                <ExerciseCard key={exercise.id} exercise={exercise} lessonId={lesson.id} role={profile!.role} onChanged={load} />
+                <ExerciseCard key={exercise.id} exercise={exercise} lessonId={lesson.id} role={profile!.role} onChanged={() => load(false)} />
               ))}
             </section>
           )}
