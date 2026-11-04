@@ -4,17 +4,10 @@ import { Link } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { useAuth } from '../contexts/AuthContext'
 import { formatDate } from '../lib/date'
+import { getExerciseProgress } from '../lib/progress'
 import { listExerciseOverview, type ExerciseOverview } from '../services/lessons'
 
 type Filter = 'ALL' | 'PENDING' | 'CORRECTED'
-
-function getProgress(exercise: ExerciseOverview) {
-  const answers = exercise.questions.flatMap((question) => question.answers)
-  const answered = exercise.questions.filter((question) => question.answers.length > 0).length
-  const corrected = answers.filter((answer) => answer.status !== 'PENDING').length
-  const complete = exercise.questions.length > 0 && answered === exercise.questions.length && corrected === exercise.questions.length
-  return { answered, corrected, complete, pendingCorrection: answers.some((answer) => answer.status === 'PENDING') }
-}
 
 export function ExercisesPage() {
   const { profile } = useAuth()
@@ -39,7 +32,7 @@ export function ExercisesPage() {
 
   const filtered = useMemo(() => exercises.filter((exercise) => {
     if (filter === 'ALL') return true
-    const progress = getProgress(exercise)
+    const progress = getExerciseProgress(exercise)
     return filter === 'CORRECTED' ? progress.complete : !progress.complete
   }), [exercises, filter])
 
@@ -61,7 +54,7 @@ export function ExercisesPage() {
       {!loading && !error && filtered.length > 0 && (
         <div className="overview-list">
           {filtered.map((exercise) => {
-            const progress = getProgress(exercise)
+            const progress = getExerciseProgress(exercise)
             const status = progress.complete ? 'Corrigido' : progress.pendingCorrection ? 'Aguardando correção' : progress.answered > 0 ? 'Em andamento' : 'Pendente'
             const action = profile?.role === 'TEACHER'
               ? (progress.pendingCorrection ? 'Corrigir' : 'Abrir')
