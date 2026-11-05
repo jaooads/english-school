@@ -10,11 +10,13 @@ English School é um caderno digital compartilhado para as aulas particulares de
 - conteúdo em blocos de texto, grammar, vocabulary, examples e links;
 - editor de aulas com ordenação simples dos blocos;
 - exercícios de resposta curta ou longa;
+- exercícios de assinalar com alternativas A, B, C e D;
 - homework usando a mesma estrutura de exercícios;
 - respostas parciais que podem ser salvas e retomadas;
 - correções com status, resposta correta e comentário da professora;
 - visão geral de exercícios com filtros Todos, Pendentes e Corrigidos;
 - sidebar no desktop e navegação inferior no celular;
+- tabelas editáveis para verbos, vocabulário e outros materiais de estudo.
 - deploy preparado para GitHub Pages.
 
 O modelo foi definido após a análise do `Digital English Notebook`. O documento usa a data como principal separador e repete, com frequência, o fluxo explicação → estrutura → exemplos → atividade → resposta → correção. A V1 traduz esse padrão em blocos e atividades sem criar um page builder complexo. O histórico completo não é importado automaticamente.
@@ -74,6 +76,11 @@ Execute [`supabase/migrations/202610270001_initial_schema.sql`](supabase/migrati
 - funções seguras para o aluno salvar respostas e para a professora corrigir.
 
 As gravações de resposta e correção passam por funções do banco. Assim, João não consegue alterar o status ou o feedback da professora manipulando o frontend.
+
+Depois da migration inicial, execute também as migrations seguintes em ordem cronológica. As mais recentes habilitam:
+
+- [`202611040001_add_multiple_choice_options.sql`](supabase/migrations/202611040001_add_multiple_choice_options.sql): alternativas para questões de assinalar;
+- [`202611040002_add_table_blocks.sql`](supabase/migrations/202611040002_add_table_blocks.sql): blocos de tabela nas matérias.
 
 ### 2. Authentication
 
