@@ -119,6 +119,13 @@ export function ExerciseEditorPage() {
       setError('Cada questão de assinalar precisa ter pelo menos duas alternativas preenchidas.')
       return
     }
+    if (type === 'MULTIPLE_CHOICE' && questions.some((question) => {
+      const normalized = question.options.map((option) => option.option_text.trim().toLocaleLowerCase('pt-BR'))
+      return new Set(normalized).size !== normalized.length
+    })) {
+      setError('As alternativas da mesma questão precisam ser diferentes.')
+      return
+    }
 
     setSaving(true)
     try {
