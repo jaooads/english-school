@@ -22,7 +22,7 @@ interface SaveExerciseInput {
   type: ExerciseType
   isHomework: boolean
   position: number
-  questions: Array<{ id: string; persisted: boolean; question: string }>
+  questions: Array<{ id: string; persisted: boolean; question: string; options: Array<{ option_text: string }> }>
   removedQuestionIds: string[]
 }
 
@@ -43,7 +43,7 @@ export async function getLesson(id: string) {
     .select(`
       *,
       lesson_blocks (*),
-      exercises (*, questions (*, answers (*)))
+      exercises (*, questions (*, answers (*), question_options (*)))
     `)
     .eq('id', id)
     .single()
@@ -53,7 +53,10 @@ export async function getLesson(id: string) {
   const lesson = data as unknown as LessonDetail
   lesson.lesson_blocks.sort((a, b) => a.position - b.position)
   lesson.exercises.sort((a, b) => a.position - b.position)
-  lesson.exercises.forEach((exercise) => exercise.questions.sort((a, b) => a.position - b.position))
+  lesson.exercises.forEach((exercise) => {
+    exercise.questions.sort((a, b) => a.position - b.position)
+    exercise.questions.forEach((question) => question.question_options.sort((a, b) => a.position - b.position))
+  })
   return lesson
 }
 
@@ -144,16 +147,37 @@ export async function saveExercise(input: SaveExerciseInput) {
       position: input.questions.indexOf(question),
     }).eq('id', question.id)
     if (error) throw new Error('A atividade foi salva, mas uma questão não pôde ser atualizada.')
+
+    const { error: deleteOptionsError } = await supabase.from('question_options').delete().eq('question_id', question.id)
+    if (deleteOptionsError) throw new Error('A atividade foi salva, mas as alternativas não puderam ser atualizadas.')
+
+    if (input.type === 'MULTIPLE_CHOICE') {
+      const { error: optionsError } = await supabase.from('question_options').insert(question.options.map((option, position) => ({
+        question_id: question.id,
+        option_text: option.option_text.trim(),
+        position,
+      })))
+      if (optionsError) throw new Error('A atividade foi salva, mas as alternativas não puderam ser adicionadas.')
+    }
   }
 
   const newQuestions = input.questions.filter((item) => !item.persisted)
-  if (newQuestions.length > 0) {
-    const { error } = await supabase.from('questions').insert(newQuestions.map((question) => ({
+  for (const question of newQuestions) {
+    const { data, error } = await supabase.from('questions').insert({
       exercise_id: exerciseId,
       question: question.question.trim(),
       position: input.questions.indexOf(question),
-    })))
-    if (error) throw new Error('A atividade foi salva, mas uma questão não pôde ser adicionada.')
+    }).select('id').single()
+    if (error || !data) throw new Error('A atividade foi salva, mas uma questão não pôde ser adicionada.')
+
+    if (input.type === 'MULTIPLE_CHOICE') {
+      const { error: optionsError } = await supabase.from('question_options').insert(question.options.map((option, position) => ({
+        question_id: data.id,
+        option_text: option.option_text.trim(),
+        position,
+      })))
+      if (optionsError) throw new Error('A atividade foi salva, mas as alternativas não puderam ser adicionadas.')
+    }
   }
 
   return exerciseId
@@ -190,12 +214,15 @@ export async function correctStudentAnswer(
 export async function listExerciseOverview() {
   const { data, error } = await supabase
     .from('exercises')
-    .select('*, lessons!inner(id, title, lesson_date), questions(*, answers(*))')
+    .select('*, lessons!inner(id, title, lesson_date), questions(*, answers(*), question_options(*))')
     .order('lesson_date', { referencedTable: 'lessons', ascending: false })
     .order('position', { ascending: true })
 
   if (error) throw new Error('Não foi possível carregar os exercícios.')
   const exercises = (data ?? []) as unknown as ExerciseOverview[]
-  exercises.forEach((exercise) => exercise.questions.sort((a, b) => a.position - b.position))
+  exercises.forEach((exercise) => {
+    exercise.questions.sort((a, b) => a.position - b.position)
+    exercise.questions.forEach((question) => question.question_options.sort((a, b) => a.position - b.position))
+  })
   return exercises
 }

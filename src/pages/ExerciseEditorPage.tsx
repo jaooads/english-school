@@ -9,10 +9,15 @@ interface EditableQuestion {
   id: string
   persisted: boolean
   question: string
+  options: Array<{ option_text: string }>
+}
+
+function defaultOptions() {
+  return Array.from({ length: 4 }, () => ({ option_text: '' }))
 }
 
 function newQuestion(): EditableQuestion {
-  return { id: crypto.randomUUID(), persisted: false, question: '' }
+  return { id: crypto.randomUUID(), persisted: false, question: '', options: defaultOptions() }
 }
 
 export function ExerciseEditorPage() {
@@ -42,10 +47,15 @@ export function ExerciseEditorPage() {
         if (!exercise) throw new Error('Este exercício não foi encontrado.')
         setTitle(exercise.title)
         setInstructions(exercise.instructions ?? '')
-        setType(exercise.type === 'MULTIPLE_CHOICE' ? 'TEXT_INPUT' : exercise.type)
+        setType(exercise.type)
         setIsHomework(exercise.is_homework)
         setPosition(exercise.position)
-        setQuestions(exercise.questions.map((question) => ({ id: question.id, persisted: true, question: question.question })))
+        setQuestions(exercise.questions.map((question) => ({
+          id: question.id,
+          persisted: true,
+          question: question.question,
+          options: question.question_options.map((option) => ({ option_text: option.option_text })),
+        })))
         setInitialQuestionIds(exercise.questions.map((question) => question.id))
       })
       .catch((caught) => setError(caught instanceof Error ? caught.message : 'Não foi possível carregar o exercício.'))
@@ -73,6 +83,25 @@ export function ExerciseEditorPage() {
     setQuestions((current) => current.filter((item) => item.id !== id))
   }
 
+  function changeType(nextType: ExerciseType) {
+    setType(nextType)
+    if (nextType === 'MULTIPLE_CHOICE') {
+      setQuestions((current) => current.map((question) => question.options.length >= 2 ? question : { ...question, options: defaultOptions() }))
+    }
+  }
+
+  function updateOption(questionId: string, optionIndex: number, optionText: string) {
+    setQuestions((current) => current.map((question) => question.id === questionId
+      ? { ...question, options: question.options.map((option, index) => index === optionIndex ? { option_text: optionText } : option) }
+      : question))
+  }
+
+  function removeOption(questionId: string, optionIndex: number) {
+    setQuestions((current) => current.map((question) => question.id === questionId
+      ? { ...question, options: question.options.filter((_option, index) => index !== optionIndex) }
+      : question))
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (!lessonId || saving) return
@@ -84,6 +113,10 @@ export function ExerciseEditorPage() {
     }
     if (questions.length === 0 || questions.some((question) => !question.question.trim())) {
       setError('Adicione e preencha pelo menos uma questão.')
+      return
+    }
+    if (type === 'MULTIPLE_CHOICE' && questions.some((question) => question.options.length < 2 || question.options.some((option) => !option.option_text.trim()))) {
+      setError('Cada questão de assinalar precisa ter pelo menos duas alternativas preenchidas.')
       return
     }
 
@@ -123,7 +156,7 @@ export function ExerciseEditorPage() {
           <div className="field"><label htmlFor="exercise-title">Título</label><input id="exercise-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ex.: Complete as frases" required /></div>
           <div className="field"><label htmlFor="exercise-instructions">Instruções <span>opcional</span></label><textarea id="exercise-instructions" value={instructions} onChange={(event) => setInstructions(event.target.value)} placeholder="Explique como responder…" /></div>
           <div className="exercise-options">
-            <div className="field"><label htmlFor="exercise-type">Formato da resposta</label><select id="exercise-type" value={type} onChange={(event) => setType(event.target.value as ExerciseType)}><option value="TEXT_INPUT">Resposta curta</option><option value="TEXTAREA">Resposta longa</option></select></div>
+            <div className="field"><label htmlFor="exercise-type">Formato da resposta</label><select id="exercise-type" value={type} onChange={(event) => changeType(event.target.value as ExerciseType)}><option value="TEXT_INPUT">Resposta curta</option><option value="TEXTAREA">Resposta longa</option><option value="MULTIPLE_CHOICE">Assinalar alternativa</option></select></div>
             <label className="check-field"><input type="checkbox" checked={isHomework} onChange={(event) => setIsHomework(event.target.checked)} /><span><strong>Homework</strong><small>Mostrar esta atividade como tarefa de casa.</small></span></label>
           </div>
         </section>
@@ -133,7 +166,21 @@ export function ExerciseEditorPage() {
           {questions.map((question, index) => (
             <section className="editor-panel question-editor" key={question.id}>
               <span className="question-number">{index + 1}</span>
-              <div className="field"><label htmlFor={`question-${question.id}`}>Enunciado</label><textarea id={`question-${question.id}`} value={question.question} onChange={(event) => setQuestions((current) => current.map((item) => item.id === question.id ? { ...item, question: event.target.value } : item))} placeholder="Digite a pergunta ou frase para completar…" required /></div>
+              <div className="field"><label htmlFor={`question-${question.id}`}>Enunciado</label><textarea id={`question-${question.id}`} value={question.question} onChange={(event) => setQuestions((current) => current.map((item) => item.id === question.id ? { ...item, question: event.target.value } : item))} placeholder="Digite a pergunta ou frase para completar…" required />
+                {type === 'MULTIPLE_CHOICE' && (
+                  <div className="multiple-choice-editor">
+                    <span>Alternativas</span>
+                    {question.options.map((option, optionIndex) => (
+                      <div className="option-editor" key={optionIndex}>
+                        <span>{String.fromCharCode(65 + optionIndex)}</span>
+                        <input value={option.option_text} onChange={(event) => updateOption(question.id, optionIndex, event.target.value)} placeholder={`Alternativa ${String.fromCharCode(65 + optionIndex)}`} required />
+                        <button type="button" className="icon-button icon-button--danger" onClick={() => removeOption(question.id, optionIndex)} disabled={question.options.length <= 2} aria-label={`Remover alternativa ${String.fromCharCode(65 + optionIndex)}`}><Trash2 size={15} /></button>
+                      </div>
+                    ))}
+                    {question.options.length < 6 && <button type="button" className="add-option-button" onClick={() => setQuestions((current) => current.map((item) => item.id === question.id ? { ...item, options: [...item.options, { option_text: '' }] } : item))}><Plus size={15} /> Adicionar alternativa</button>}
+                  </div>
+                )}
+              </div>
               <div className="question-editor__actions">
                 <button type="button" className="icon-button" onClick={() => moveQuestion(index, -1)} disabled={index === 0} aria-label="Mover questão para cima"><ArrowUp size={17} /></button>
                 <button type="button" className="icon-button" onClick={() => moveQuestion(index, 1)} disabled={index === questions.length - 1} aria-label="Mover questão para baixo"><ArrowDown size={17} /></button>

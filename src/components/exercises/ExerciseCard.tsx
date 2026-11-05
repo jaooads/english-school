@@ -92,14 +92,31 @@ export function ExerciseCard({ exercise, lessonId, role, onChanged }: ExerciseCa
               </div>
               {role === 'STUDENT' ? (
                 <>
-                  <label className="answer-field" htmlFor={`answer-${question.id}`}>
+                  {exercise.type === 'MULTIPLE_CHOICE' ? (
+                    <fieldset className="choice-list">
+                      <legend>Sua resposta</legend>
+                      {question.question_options.map((option, optionIndex) => (
+                        <label key={option.id} className={drafts[question.id] === option.option_text ? 'choice-option choice-option--selected' : 'choice-option'}>
+                          <input
+                            type="radio"
+                            name={`answer-${question.id}`}
+                            value={option.option_text}
+                            checked={drafts[question.id] === option.option_text}
+                            onChange={(event) => setDrafts((current) => ({ ...current, [question.id]: event.target.value }))}
+                          />
+                          <span>{String.fromCharCode(65 + optionIndex)}</span>
+                          <strong>{option.option_text}</strong>
+                        </label>
+                      ))}
+                    </fieldset>
+                  ) : <label className="answer-field" htmlFor={`answer-${question.id}`}>
                     <span>Sua resposta</span>
                   {exercise.type === 'TEXTAREA' ? (
                     <textarea id={`answer-${question.id}`} value={drafts[question.id] ?? ''} onChange={(event) => setDrafts((current) => ({ ...current, [question.id]: event.target.value }))} placeholder="Escreva sua resposta…" />
                   ) : (
                     <input id={`answer-${question.id}`} value={drafts[question.id] ?? ''} onChange={(event) => setDrafts((current) => ({ ...current, [question.id]: event.target.value }))} placeholder="Digite sua resposta…" />
                   )}
-                  </label>
+                  </label>}
                   {answer && <StudentCorrection answer={answer} />}
                 </>
               ) : answer ? (

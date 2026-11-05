@@ -46,6 +46,13 @@ export interface Question {
   position: number
 }
 
+export interface QuestionOption {
+  id: string
+  question_id: string
+  option_text: string
+  position: number
+}
+
 export interface Answer {
   id: string
   question_id: string
@@ -59,7 +66,7 @@ export interface Answer {
 }
 
 export interface ExerciseWithQuestions extends Exercise {
-  questions: Array<Question & { answers: Answer[] }>
+  questions: Array<Question & { answers: Answer[]; question_options: QuestionOption[] }>
 }
 
 export interface LessonDetail extends Lesson {
