@@ -1,4 +1,5 @@
-import { BookOpenText, ExternalLink, FileText, Image as ImageIcon, Languages, Lightbulb, List, Text } from 'lucide-react'
+import { BookOpenText, ExternalLink, FileText, Image as ImageIcon, Languages, Lightbulb, List, Table2, Text } from 'lucide-react'
+import { parseLessonTable } from '../../lib/lessonTable'
 import type { LessonBlock, LessonBlockType } from '../../types/domain'
 
 const blockMeta: Record<LessonBlockType, { label: string; icon: typeof Text }> = {
@@ -8,6 +9,7 @@ const blockMeta: Record<LessonBlockType, { label: string; icon: typeof Text }> =
   EXAMPLE: { label: 'Examples', icon: Lightbulb },
   LINK: { label: 'Link', icon: ExternalLink },
   IMAGE: { label: 'Material visual', icon: ImageIcon },
+  TABLE: { label: 'Study table', icon: Table2 },
 }
 
 function isSafeExternalUrl(value: string) {
@@ -42,6 +44,7 @@ export function LessonBlockCard({ block, step }: { block: LessonBlock; step: num
   const meta = blockMeta[block.type]
   const Icon = meta.icon
   const isSourceNote = block.title?.toLocaleLowerCase('pt-BR').startsWith('identifica')
+  const table = block.type === 'TABLE' ? parseLessonTable(block.content) : null
 
   if (isSourceNote) {
     return (
@@ -59,7 +62,14 @@ export function LessonBlockCard({ block, step }: { block: LessonBlock; step: num
         <span className="lesson-block__step">Etapa {String(step).padStart(2, '0')}</span>
       </div>
       {block.title && <h2>{block.title}</h2>}
-      {block.type === 'IMAGE' ? (
+      {block.type === 'TABLE' && table ? (
+        <div className="lesson-table-wrap">
+          <table className="lesson-table">
+            <thead><tr>{table.headers.map((header, index) => <th key={index}>{header}</th>)}</tr></thead>
+            <tbody>{table.rows.map((row, rowIndex) => <tr key={rowIndex}>{row.map((cell, cellIndex) => <td key={cellIndex}>{cell || '—'}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+      ) : block.type === 'IMAGE' ? (
         <img
           className="lesson-block__image"
           src={isSafeExternalUrl(block.content) ? block.content : `${import.meta.env.BASE_URL}notebook-media/${encodeURIComponent(block.content)}`}

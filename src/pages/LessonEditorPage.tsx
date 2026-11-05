@@ -1,8 +1,10 @@
 import { AlertCircle, ArrowDown, ArrowLeft, ArrowUp, Plus, Save, Trash2 } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { TableBlockEditor } from '../components/lessons/TableBlockEditor'
 import { useAuth } from '../contexts/AuthContext'
 import { todayInputValue } from '../lib/date'
+import { createLessonTable, serializeLessonTable } from '../lib/lessonTable'
 import { getLesson, saveLesson } from '../services/lessons'
 import type { LessonBlockType } from '../types/domain'
 
@@ -21,10 +23,11 @@ const blockOptions: Array<{ type: LessonBlockType; label: string }> = [
   { type: 'EXAMPLE', label: 'Examples' },
   { type: 'LINK', label: 'Link' },
   { type: 'IMAGE', label: 'Imagem' },
+  { type: 'TABLE', label: 'Tabela' },
 ]
 
 function newBlock(type: LessonBlockType): EditableBlock {
-  return { id: crypto.randomUUID(), persisted: false, type, title: '', content: '' }
+  return { id: crypto.randomUUID(), persisted: false, type, title: '', content: type === 'TABLE' ? serializeLessonTable(createLessonTable()) : '' }
 }
 
 export function LessonEditorPage() {
@@ -63,6 +66,12 @@ export function LessonEditorPage() {
 
   function updateBlock(id: string, field: 'title' | 'content' | 'type', value: string) {
     setBlocks((current) => current.map((block) => block.id === id ? { ...block, [field]: value } : block))
+  }
+
+  function changeBlockType(id: string, type: LessonBlockType) {
+    setBlocks((current) => current.map((block) => block.id === id
+      ? { ...block, type, content: type === 'TABLE' && block.type !== 'TABLE' ? serializeLessonTable(createLessonTable()) : block.content }
+      : block))
   }
 
   function moveBlock(index: number, direction: -1 | 1) {
@@ -134,7 +143,7 @@ export function LessonEditorPage() {
           {blocks.map((block, index) => (
             <section className="editor-panel editor-block" key={block.id}>
               <div className="editor-block__toolbar">
-                <select aria-label="Tipo de bloco" value={block.type} onChange={(event) => updateBlock(block.id, 'type', event.target.value)}>
+                <select aria-label="Tipo de bloco" value={block.type} onChange={(event) => changeBlockType(block.id, event.target.value as LessonBlockType)}>
                   {blockOptions.map((option) => <option key={option.type} value={option.type}>{option.label}</option>)}
                 </select>
                 <div>
@@ -143,8 +152,12 @@ export function LessonEditorPage() {
                   <button type="button" className="icon-button icon-button--danger" onClick={() => removeBlock(block.id)} aria-label="Remover bloco"><Trash2 size={17} /></button>
                 </div>
               </div>
-              <div className="field"><label htmlFor={`block-title-${block.id}`}>Título <span>opcional</span></label><input id={`block-title-${block.id}`} value={block.title} onChange={(event) => updateBlock(block.id, 'title', event.target.value)} placeholder={block.type === 'LINK' ? 'Nome do material' : 'Ex.: Estrutura'} /></div>
-              <div className="field"><label htmlFor={`block-content-${block.id}`}>{block.type === 'LINK' ? 'URL' : block.type === 'IMAGE' ? 'URL ou arquivo' : 'Conteúdo'}</label><textarea id={`block-content-${block.id}`} value={block.content} onChange={(event) => updateBlock(block.id, 'content', event.target.value)} placeholder={block.type === 'LINK' ? 'https://…' : block.type === 'IMAGE' ? 'https://… ou nome-do-arquivo.png' : 'Escreva a explicação, exemplos ou anotações…'} required /></div>
+              <div className="field"><label htmlFor={`block-title-${block.id}`}>Título <span>opcional</span></label><input id={`block-title-${block.id}`} value={block.title} onChange={(event) => updateBlock(block.id, 'title', event.target.value)} placeholder={block.type === 'LINK' ? 'Nome do material' : block.type === 'TABLE' ? 'Ex.: Irregular verbs' : 'Ex.: Estrutura'} /></div>
+              {block.type === 'TABLE' ? (
+                <div className="field"><label>Conteúdo da tabela</label><TableBlockEditor value={block.content} onChange={(value) => updateBlock(block.id, 'content', value)} /></div>
+              ) : (
+                <div className="field"><label htmlFor={`block-content-${block.id}`}>{block.type === 'LINK' ? 'URL' : block.type === 'IMAGE' ? 'URL ou arquivo' : 'Conteúdo'}</label><textarea id={`block-content-${block.id}`} value={block.content} onChange={(event) => updateBlock(block.id, 'content', event.target.value)} placeholder={block.type === 'LINK' ? 'https://…' : block.type === 'IMAGE' ? 'https://… ou nome-do-arquivo.png' : 'Escreva a explicação, exemplos ou anotações…'} required /></div>
+              )}
             </section>
           ))}
         </div>

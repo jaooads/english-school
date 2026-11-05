@@ -1,5 +1,5 @@
 export type AppRole = 'TEACHER' | 'STUDENT'
-export type LessonBlockType = 'TEXT' | 'GRAMMAR' | 'VOCABULARY' | 'EXAMPLE' | 'LINK' | 'IMAGE'
+export type LessonBlockType = 'TEXT' | 'GRAMMAR' | 'VOCABULARY' | 'EXAMPLE' | 'LINK' | 'IMAGE' | 'TABLE'
 export type ExerciseType = 'TEXT_INPUT' | 'TEXTAREA' | 'MULTIPLE_CHOICE'
 export type AnswerStatus = 'PENDING' | 'CORRECT' | 'INCORRECT'
 
