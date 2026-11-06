@@ -69,7 +69,6 @@ export function LoginPage() {
             {submitting || loading ? 'Entrando…' : 'Entrar'}
           </button>
         </form>
-        <small>Não há cadastro público. Os acessos são configurados no Supabase.</small>
       </section>
     </main>
   )
